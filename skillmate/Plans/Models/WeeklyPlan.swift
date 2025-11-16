@@ -13,5 +13,5 @@ struct WeeklyPlan: Codable, Identifiable {
     let weekEnd: Date
     let weeksToComplete: Int
     let createdAt: Date
-    let tasks: [PlanTask]
+    let tasks: [TaskItem]
 }
