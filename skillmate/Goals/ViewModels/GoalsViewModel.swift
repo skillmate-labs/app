@@ -33,10 +33,8 @@ class GoalsViewModel {
                 daysPerWeek: days
             )
             
-            let goal = try await repo.create(req)
-            
-            goals.insert(goal, at: 0)
-            
+            _ = try await repo.create(req)
+            await load()
         } catch {
             errorMessage = error.localizedDescription
         }

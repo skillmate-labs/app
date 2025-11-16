@@ -11,7 +11,7 @@ final class GoalsRepository {
     private let web = WebService()
     
     // MARK: - Create
-    func create(_ req: CreateGoalRequest) async throws -> Goal {
+    func create(_ req: CreateGoalRequest) async throws -> GoalDetail {
         try await web.request(
             .goals,
             method: .POST,
