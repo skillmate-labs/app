@@ -4,7 +4,6 @@
 //
 //  Created by Gui Maggiorini on 16/11/25.
 //
-// Services/API/Repositories/GoalsRepository.swift
 
 import Foundation
 
