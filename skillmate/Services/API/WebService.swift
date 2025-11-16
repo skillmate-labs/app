@@ -48,11 +48,18 @@ final class WebService {
             throw NetworkError.badStatus(code: http.statusCode, data: data)
         }
         
-        if data.isEmpty, T.self == Empty.self {
-            return Empty() as! T
+        if data.isEmpty {
+            if let optionalMeta = T.self as? AnyOptional.Type {
+                return optionalMeta.nilValue as! T
+            }
+            if T.self == Empty.self {
+                return Empty() as! T
+            }
         }
         
         let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        
         decoderConfig?(decoder)
         
         do {
@@ -61,6 +68,14 @@ final class WebService {
             throw NetworkError.failedToDecodeResponse
         }
     }
+}
+
+private protocol AnyOptional {
+    static var nilValue: Any { get }
+}
+
+extension Optional: AnyOptional {
+    static var nilValue: Any { Self.none as Any }
 }
 
 struct Empty: Decodable {}
