@@ -8,9 +8,10 @@
 import Foundation
 
 struct Goal: Codable, Identifiable {
-    let id: UUID
+    var id: UUID = UUID()
     let title: String
-    let experience: Experience
-    let hoursPerDay: Int
-    let daysPerWeek: Int
+    let experience: String
+    var hoursPerDay: Int
+    var daysPerWeek: Int
+    var createdAt: Date?
 }

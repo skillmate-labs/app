@@ -9,6 +9,7 @@ import Foundation
 
 enum Endpoint {
     case goals
+    case listGoals(cursor: String?, limit: Int)
     case goal(id: UUID)
     
     // PLANS
@@ -25,6 +26,16 @@ enum Endpoint {
             // MARK: - GOALS
         case .goals:
             return APIConfiguration.baseURL.appending(path: "goals")
+            
+        case .listGoals(let cursor, let limit):
+            var items = [
+                URLQueryItem(name: "limit", value: "\(limit)")
+            ]
+            if let cursor { items.append(URLQueryItem(name: "cursor", value: cursor)) }
+            
+            return APIConfiguration.baseURL
+                .appending(path: "goals")
+                .appendingQueryItems(items)
             
         case .goal(let id):
             return APIConfiguration.baseURL
@@ -70,4 +81,3 @@ enum Endpoint {
         }
     }
 }
-

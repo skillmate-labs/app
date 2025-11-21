@@ -11,7 +11,7 @@ final class GoalsRepository {
     private let web = WebService()
     
     // MARK: - Create
-    func create(_ req: CreateGoalRequest) async throws -> GoalDetail {
+    func create(_ req: Goal) async throws -> Goal {
         try await web.request(
             .goals,
             method: .POST,
@@ -23,9 +23,9 @@ final class GoalsRepository {
     }
     
     // MARK: - Get All
-    func getAll() async throws -> GoalsListResponse {
+    func getAll(cursor: String? = nil, limit: Int = 10) async throws -> GoalsListResponse {
         try await web.request(
-            .goals,
+            .listGoals(cursor: cursor, limit: limit),
             method: .GET,
             decoderConfig: { decoder in
                 decoder.dateDecodingStrategy = .iso8601

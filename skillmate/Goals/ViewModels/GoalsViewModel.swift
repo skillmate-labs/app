@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Observation
 
 @Observable
 class GoalsViewModel {
@@ -15,18 +14,39 @@ class GoalsViewModel {
     var goals: [Goal] = []
     var errorMessage: String?
     
+    var nextCursor: String?
+    var hasNextPage = true
+    var isLoading = false
+    
     func load() async {
+        guard !isLoading else { return }
+        guard hasNextPage else { return }
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        let cursor = nextCursor
+        
         do {
-            let response = try await repo.getAll()
-            goals = response.data
+            let response = try await repo.getAll(cursor: cursor)
+            
+            if cursor == nil {
+                goals = response.data
+            } else {
+                goals += response.data
+            }
+            
+            nextCursor = response.pageInfo.nextCursor
+            hasNextPage = response.pageInfo.hasNextPage
+            
         } catch {
             errorMessage = error.localizedDescription
         }
     }
     
-    func create(title: String, exp: Experience, hours: Int, days: Int) async {
+    func create(title: String, exp: String, hours: Int, days: Int) async {
         do {
-            let req = CreateGoalRequest(
+            let req = Goal(
                 title: title,
                 experience: exp,
                 hoursPerDay: hours,
@@ -34,9 +54,16 @@ class GoalsViewModel {
             )
             
             _ = try await repo.create(req)
-            await load()
+            await reload()
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+    
+    func reload() async {
+        goals = []
+        nextCursor = nil
+        hasNextPage = true
+        await load()
     }
 }
