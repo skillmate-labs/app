@@ -8,7 +8,7 @@
 import Foundation
 
 @Observable
-class GoalsViewModel {
+class GoalsStore {
     private let repo = GoalsRepository()
     
     var goals: [Goal] = []
@@ -44,15 +44,8 @@ class GoalsViewModel {
         }
     }
     
-    func create(title: String, exp: String, hours: Int, days: Int) async {
+    func create(goal req: Goal) async {
         do {
-            let req = Goal(
-                title: title,
-                experience: exp,
-                hoursPerDay: hours,
-                daysPerWeek: days
-            )
-            
             _ = try await repo.create(req)
             await reload()
         } catch {

@@ -13,20 +13,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             if authService.isSignedIn {
-                VStack(spacing: 16) {
-                    VStack {
-                        Image(systemName: "globe")
-                            .imageScale(.large)
-                            .foregroundStyle(.tint)
-                        Text("Hello, world!")
-                    }
-                    
-                    Button("Sign Out") {
-                        authService.signOut()
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(.red)
-                }
+                GoalsList()
             } else {
                 SignUpView()
             }
@@ -37,4 +24,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(AuthService())
+        .environment(GoalsStore())
 }

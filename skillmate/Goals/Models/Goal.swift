@@ -9,9 +9,16 @@ import Foundation
 
 struct Goal: Codable, Identifiable {
     var id: UUID = UUID()
-    let title: String
-    let experience: String
+    var title: String
+    var experience: String
     var hoursPerDay: Int
     var daysPerWeek: Int
     var createdAt: Date?
+}
+
+
+extension Goal {
+    static var empty: Goal {
+        Goal(title: "", experience: "", hoursPerDay: 1, daysPerWeek: 1)
+    }
 }

@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct GoalsList: View {
+    @Environment(GoalsStore.self) var store
     @State private var searchText: String = ""
-    private var viewModel = GoalsViewModel()
+    @State private var isAddingGoal: Bool = false
     
     private var filteredGoals: [Goal] {
-        if searchText.isEmpty { return viewModel.goals }
+        if searchText.isEmpty { return store.goals }
         
-        return viewModel.goals.filter {
+        return store.goals.filter {
             $0.title.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -22,19 +23,50 @@ struct GoalsList: View {
     
     var body: some View {
         NavigationStack {
-            List(viewModel.goals) { goal in
+            List(filteredGoals) { goal in
                 GoalCard(goal: goal)
             }
             .task() {
-                await viewModel.load()
+                await store.load()
+            }
+            .refreshable {
+                await store.reload()
             }
             .navigationTitle("Goals")
             .toolbarTitleDisplayMode(.large)
             .searchable(text: $searchText)
+            .toolbar {
+                DefaultToolbarItem(kind: .search, placement: .bottomBar)
+                
+                ToolbarSpacer(placement: .bottomBar)
+                
+                ToolbarItem(placement: .bottomBar) {
+                    Button("Add goal", systemImage: "plus") {
+                        isAddingGoal.toggle()
+                    }
+                }
+            }
+            .overlay {
+                if store.goals.isEmpty, searchText.isEmpty {
+                    ContentUnavailableView {
+                        Label("Empty goals", systemImage: "book.pages")
+                    } description: {
+                        Text("Your goals will appear here when you create them")
+                    }
+                }
+                
+                if filteredGoals.isEmpty, !searchText.isEmpty {
+                    ContentUnavailableView.search
+                }
+            }
+            .sheet(isPresented: $isAddingGoal) {
+                CreateGoal()
+            }
         }
     }
 }
 
 #Preview {
     GoalsList()
+        .environment(GoalsStore())
 }

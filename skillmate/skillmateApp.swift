@@ -11,6 +11,7 @@ import Firebase
 @main
 struct skillmateApp: App {
     @State private var authService: AuthService
+    @State private var goalsStore: GoalsStore = GoalsStore()
     
     init() {
         FirebaseApp.configure()
@@ -23,6 +24,7 @@ struct skillmateApp: App {
         WindowGroup {
             ContentView()
                 .environment(authService)
+                .environment(goalsStore)
         }
     }
 }
