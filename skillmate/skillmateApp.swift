@@ -12,7 +12,9 @@ import Firebase
 struct skillmateApp: App {
     @State private var authService: AuthService
     @State private var goalsStore: GoalsStore = GoalsStore()
-    
+    @State private var plansStore: PlansStore = PlansStore()
+    @State private var taskStore: TaskStore = TaskStore()
+
     init() {
         FirebaseApp.configure()
         
@@ -25,6 +27,8 @@ struct skillmateApp: App {
             ContentView()
                 .environment(authService)
                 .environment(goalsStore)
+                .environment(plansStore)
+                .environment(taskStore)
         }
     }
 }

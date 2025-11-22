@@ -25,4 +25,6 @@ struct ContentView: View {
     ContentView()
         .environment(AuthService())
         .environment(GoalsStore())
+        .environment(PlansStore())
+        .environment(TaskStore())
 }

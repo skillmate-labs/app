@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct TaskItem: Codable, Identifiable {
+struct TaskItem: Codable, Identifiable, Equatable {
     let id: UUID
     let title: String
-    let completed: Bool
-    let difficulty: TaskDifficulty
-    let references: [Reference]?
+    var completed: Bool = false
+    var difficulty: TaskDifficulty = .normal
+    var references: [Reference] = []
 }

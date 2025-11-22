@@ -24,7 +24,11 @@ struct GoalsList: View {
     var body: some View {
         NavigationStack {
             List(filteredGoals) { goal in
-                GoalCard(goal: goal)
+                NavigationLink {
+                    GoalDetail(goal: goal)
+                } label: {
+                    GoalCard(goal: goal)
+                }
             }
             .task() {
                 await store.load()
@@ -69,4 +73,6 @@ struct GoalsList: View {
 #Preview {
     GoalsList()
         .environment(GoalsStore())
+        .environment(TaskStore())
+        .environment(PlansStore())
 }

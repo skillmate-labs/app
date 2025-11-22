@@ -6,10 +6,9 @@
 //
 
 import Foundation
-import Observation
 
 @Observable
-class TasksViewModel {
+class TaskStore {
     
     private let repo = TasksRepository()
     
@@ -17,37 +16,36 @@ class TasksViewModel {
     var errorMessage: String?
     
     private var nextCursor: String?
-    private var hasNextPage: Bool = false
+    private var hasNextPage: Bool = true
+    private var isLoading: Bool = false
     
     func load(for planId: UUID) async {
-        do {
-            let response = try await repo.list(planId: planId, cursor: nil)
-            
-            self.tasks = response.data
-            self.nextCursor = response.pageInfo.nextCursor
-            self.hasNextPage = response.pageInfo.hasNextPage
-            
-        } catch {
-            self.errorMessage = error.localizedDescription
-        }
-    }
-    
-    func loadMore(for planId: UUID) async {
-        guard hasNextPage, let cursor = nextCursor else { return }
+        guard !isLoading else { return }
+        guard hasNextPage else { return }
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        let cursor = nextCursor
         
         do {
             let response = try await repo.list(planId: planId, cursor: cursor)
             
-            self.tasks += response.data
-            self.nextCursor = response.pageInfo.nextCursor
-            self.hasNextPage = response.pageInfo.hasNextPage
+            if cursor == nil {
+                tasks = response.data
+            } else {
+                tasks += response.data
+            }
+            
+            nextCursor = response.pageInfo.nextCursor
+            hasNextPage = response.pageInfo.hasNextPage
             
         } catch {
-            self.errorMessage = error.localizedDescription
+            errorMessage = error.localizedDescription
         }
     }
     
-    func update(taskId: UUID, completed: Bool?, difficulty: TaskDifficulty?) async {
+    func update(taskId: UUID, completed: Bool? = nil, difficulty: TaskDifficulty? = nil) async {
         do {
             guard let index = tasks.firstIndex(where: { $0.id == taskId }) else { return }
             
@@ -63,5 +61,12 @@ class TasksViewModel {
         } catch {
             self.errorMessage = error.localizedDescription
         }
+    }
+    
+    func reload(planId: UUID) async {
+        tasks = []
+        nextCursor = nil
+        hasNextPage = true
+        await load(for: planId)
     }
 }
