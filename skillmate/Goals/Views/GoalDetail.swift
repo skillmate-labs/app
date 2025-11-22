@@ -13,10 +13,10 @@ struct GoalDetail: View {
     
     var body: some View {
         NavigationStack {
-            List(planStore.plans) { plan in
+            List(plans) { plan in
                 PlanSectionCard(plan: plan)
                     .onAppear {
-                        if plan.id == planStore.plans.last?.id {
+                        if plan.id == plans.last?.id {
                             Task {
                                 await planStore.load(goalId: goal.id)
                             }
@@ -26,11 +26,11 @@ struct GoalDetail: View {
             .task {
                 await planStore.load(goalId: goal.id)
                 
-                if planStore.plans.isEmpty {
+                if planStore.plans(for: goal.id).isEmpty {
                     await planStore.generate(for: goal.id)
                 }
                 
-                if let firstPlan = planStore.plans.first {
+                if let firstPlan = planStore.plans(for: goal.id).first {
                     if Date() > firstPlan.weekEnd {
                         await planStore.generate(for: goal.id)
                     }
@@ -39,6 +39,12 @@ struct GoalDetail: View {
             .navigationTitle(goal.title)
             .toolbarTitleDisplayMode(.inline)
         }
+    }
+}
+
+private extension GoalDetail {
+    var plans: [PlanSummary] {
+        planStore.plans(for: goal.id)
     }
 }
 

@@ -29,6 +29,14 @@ struct GoalsList: View {
                 } label: {
                     GoalCard(goal: goal)
                 }
+                .onAppear {
+                    guard searchText.isEmpty else { return }
+                    guard goal.id == store.goals.last?.id else { return }
+                    
+                    Task {
+                        await store.load()
+                    }
+                }
             }
             .task() {
                 await store.load()
