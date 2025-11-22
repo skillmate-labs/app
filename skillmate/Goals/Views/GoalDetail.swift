@@ -12,33 +12,41 @@ struct GoalDetail: View {
     var goal: Goal
     
     var body: some View {
-        NavigationStack {
-            List(plans) { plan in
-                PlanSectionCard(plan: plan)
-                    .onAppear {
-                        if plan.id == plans.last?.id {
-                            Task {
-                                await planStore.load(goalId: goal.id)
+        Group {
+            if (planStore.plans(for: goal.id).isEmpty) {
+                List {
+                    PlanSectionCardSkeleton()
+                }
+            } else {
+                List(plans) { plan in
+                    PlanSectionCard(plan: plan)
+                        .onAppear {
+                            if plan.id == plans.last?.id {
+                                Task {
+                                    await planStore.load(goalId: goal.id)
+                                }
                             }
                         }
-                    }
+                }
             }
-            .task {
-                await planStore.load(goalId: goal.id)
-                
-                if planStore.plans(for: goal.id).isEmpty {
+        }
+        .task {
+            await planStore.load(goalId: goal.id)
+            
+            if planStore.plans(for: goal.id).isEmpty {
+                await planStore.generate(for: goal.id)
+            }
+            
+            if let firstPlan = planStore.plans(for: goal.id).first {
+                if Date() > firstPlan.weekEnd {
                     await planStore.generate(for: goal.id)
                 }
-                
-                if let firstPlan = planStore.plans(for: goal.id).first {
-                    if Date() > firstPlan.weekEnd {
-                        await planStore.generate(for: goal.id)
-                    }
-                }
             }
-            .navigationTitle(goal.title)
-            .toolbarTitleDisplayMode(.inline)
         }
+        .scrollContentBackground(.hidden)
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(goal.title)
+        .toolbarTitleDisplayMode(.inline)
     }
 }
 

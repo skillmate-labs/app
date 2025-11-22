@@ -9,8 +9,11 @@ import SwiftUI
 
 struct GoalsList: View {
     @Environment(GoalsStore.self) var store
+    @Namespace private var goalNamespace
     @State private var searchText: String = ""
     @State private var isAddingGoal: Bool = false
+    @State private var isShowingGoalTabs: Bool = false
+    @State private var activeGoalId: UUID?
     
     private var filteredGoals: [Goal] {
         if searchText.isEmpty { return store.goals }
@@ -24,11 +27,15 @@ struct GoalsList: View {
     var body: some View {
         NavigationStack {
             List(filteredGoals) { goal in
-                NavigationLink {
-                    GoalDetail(goal: goal)
+                Button {
+                    activeGoalId = goal.id
+                    isShowingGoalTabs = true
                 } label: {
                     GoalCard(goal: goal)
+                        .matchedTransitionSource(id: goal.id, in: goalNamespace)
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 .onAppear {
                     guard searchText.isEmpty else { return }
                     guard goal.id == store.goals.last?.id else { return }
@@ -45,7 +52,7 @@ struct GoalsList: View {
                 await store.reload()
             }
             .navigationTitle("Goals")
-            .toolbarTitleDisplayMode(.large)
+            .toolbarTitleDisplayMode(.inlineLarge)
             .searchable(text: $searchText)
             .toolbar {
                 DefaultToolbarItem(kind: .search, placement: .bottomBar)
@@ -75,6 +82,30 @@ struct GoalsList: View {
                 CreateGoal()
             }
         }
+        .fullScreenCover(isPresented: $isShowingGoalTabs, onDismiss: { activeGoalId = nil }) {
+            if let binding = activeGoalBinding {
+                GoalTabs(
+                    goals: store.goals,
+                    activeGoalId: binding
+                )
+                .navigationTransition(.zoom(sourceID: binding.wrappedValue, in: goalNamespace))
+            }
+        }
+    }
+}
+
+private extension GoalsList {
+    var activeGoalBinding: Binding<UUID>? {
+        guard let fallbackId = store.goals.first?.id else { return nil }
+        
+        return Binding(
+            get: {
+                activeGoalId ?? fallbackId
+            },
+            set: { newValue in
+                activeGoalId = newValue
+            }
+        )
     }
 }
 
