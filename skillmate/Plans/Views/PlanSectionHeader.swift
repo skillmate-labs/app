@@ -8,7 +8,14 @@
 import SwiftUI
 
 struct PlanSectionHeader: View {
+    @Environment(TaskStore.self) private var taskStore
     var plan: PlanSummary
+    
+    private var completedText: String {
+        let tasks = taskStore.tasks(for: plan.id)
+        let completed = tasks.isEmpty ? plan.completedTasks : tasks.filter(\.completed).count
+        return "\(completed)/\(plan.totalTasks) completed"
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -23,7 +30,7 @@ struct PlanSectionHeader: View {
                 
                 Spacer()
                 
-                Text("\(plan.completedTasks)/\(plan.totalTasks) completed")
+                Text(completedText)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -41,4 +48,5 @@ struct PlanSectionHeader: View {
         totalTasks: 15,
         completedTasks: 3
     ))
+    .environment(TaskStore())
 }
