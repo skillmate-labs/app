@@ -57,11 +57,9 @@ struct GoalTabs: View {
                                             activeGoalId = entry.element.id
                                         }
                                     }
-                                    // The ToolbarItem doesn't accept padding directly, so this is a workaround that I've found
-                                    .padding(.leading, entry.offset == 0 ? 8 : 0)
-                                    .padding(.trailing, entry.offset == goals.count - 1 ? 8 : 0)
                             }
                         }
+                        .padding()
                     }
                     
                     ToolbarSpacer(placement: .bottomBar)
